@@ -12,4 +12,4 @@ engine = create_engine(DATABASE_URL, echo=False)
 
 
 def init_db():
-SQLModel.metadata.create_all(engine)
+    SQLModel.metadata.create_all(engine)
