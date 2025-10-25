@@ -1,4 +1,10 @@
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
 .env
+.env.*
+data.db
 *.db
-venv/
+.idea/
+.vscode/
