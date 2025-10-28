@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from schemas.category_schema import CategoryReadSimple  # 👈 usa el modelo simple
 
 class ProductCreate(BaseModel):
     name: str
@@ -11,7 +12,7 @@ class ProductCreate(BaseModel):
 class ProductRead(ProductCreate):
     id: int
     active: bool
-    category: Optional[dict]
+    category: Optional[CategoryReadSimple] = None  # 👈 modelo liviano
 
     class Config:
         orm_mode = True

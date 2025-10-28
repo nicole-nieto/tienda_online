@@ -1,5 +1,8 @@
-from sqlmodel import SQLModel, Field, Relationship, ForeignKey
-from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.category import Category  # solo para hints, no ejecuta
 
 class Product(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
