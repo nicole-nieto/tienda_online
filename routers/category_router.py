@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from core.db import get_session
 from models.category import Category
+from models.product import Product
 from schemas.category_schema import CategoryCreate, CategoryRead, CategoryUpdate
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
@@ -65,7 +66,22 @@ def deactivate_category(category_id: int, session: Session = Depends(get_session
     category = session.get(Category, category_id)
     if not category:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
+
+    # Desactivar la categoría
     category.active = False
+
+    # Desactivar todos los productos relacionados
+    products = session.exec(
+        select(Product).where(Product.category_id == category.id)
+    ).all()
+
+    for product in products:
+        product.active = False
+        session.add(product)
+
     session.add(category)
     session.commit()
-    return {"message": "Categoría desactivada correctamente"}
+
+    return {
+        "message": f"Categoría '{category.name}' y sus productos asociados fueron desactivados correctamente."
+    }

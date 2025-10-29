@@ -134,10 +134,33 @@ def buy_product(
     session.commit()
     return {"message": f"Compra exitosa: {quantity} unidades de '{product.name}'"}
 
-# En routers/products.py o routers/categories.py (como prefieras)
+
 @router.get("/category/{category_id}", response_model=list[ProductRead])
 def get_products_by_category(category_id: int, session: Session = Depends(get_session)):
     products = session.exec(select(Product).where(Product.category_id == category_id, Product.active == True)).all()
     if not products:
         raise HTTPException(status_code=404, detail="No se encontraron productos para esta categoría")
+    return products
+
+
+@router.get("/status/", response_model=list[ProductRead])
+def list_products_by_status(
+    active: bool = Query(True, description="Filtrar productos activos (True) o inactivos (False)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Listar productos según su estado (activos o inactivos).
+
+    Parámetros:
+    - **active (bool)**: True para productos activos, False para inactivos.
+
+    Retorna:
+    - Lista de productos filtrados por su estado.
+    """
+    products = session.exec(select(Product).where(Product.active == active)).all()
+
+    if not products:
+        estado = "activos" if active else "inactivos"
+        raise HTTPException(status_code=404, detail=f"No se encontraron productos {estado}.")
+
     return products
