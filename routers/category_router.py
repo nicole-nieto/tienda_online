@@ -6,14 +6,31 @@ from schemas.category_schema import CategoryCreate, CategoryRead, CategoryUpdate
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 
-# Crear categoría
+# Crear categoría (único sin importar mayúsculas/minúsculas)
 @router.post("/", response_model=CategoryRead, status_code=status.HTTP_201_CREATED)
 def create_category(category: CategoryCreate, session: Session = Depends(get_session)):
-    new_category = Category(**category.dict())
+    # Buscar si ya existe una categoría con el mismo nombre (sin distinguir mayúsculas/minúsculas)
+    existing_category = session.exec(
+        select(Category).where(Category.name.ilike(category.name))
+    ).first()
+
+    if existing_category:
+        raise HTTPException(
+            status_code=400,
+            detail=f"La categoría '{category.name}' ya existe."
+        )
+
+    # Si no existe, crear la nueva
+    new_category = Category(
+        name=category.name.strip(),
+        description=category.description.strip()
+    )
+
     session.add(new_category)
     session.commit()
     session.refresh(new_category)
     return new_category
+
 
 # Listar solo categorías activas
 @router.get("/", response_model=list[CategoryRead])
